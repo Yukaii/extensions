@@ -2,16 +2,26 @@ import { ActionPanel, ActionPanelItem, Icon, List, useNavigation } from "@raycas
 import useEndpoints from "./endpoint/useEndpoints";
 import moment from "moment";
 import AddCommand from "./add";
+import usePeriodically from "./utils/usePeriodically";
+import { shouldUpdateEndpoint } from "./endpoint/utils";
 
 export default function Command() {
   const { endpoints, isLoading, triggerEndpointRender, removeEndpoint } = useEndpoints();
   const { push } = useNavigation();
 
+  usePeriodically(() => {
+    endpoints.forEach((endpoint) => {
+      if (shouldUpdateEndpoint(endpoint)) {
+        triggerEndpointRender(endpoint);
+      }
+    });
+  }, 60 * 1000);
+
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Filter by title...">
       {endpoints.map((endpoint, index) => {
         // Initialize for the first time
-        if (!endpoint.renderedResults) {
+        if (shouldUpdateEndpoint(endpoint)) {
           triggerEndpointRender(endpoint);
         }
 

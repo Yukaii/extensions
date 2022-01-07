@@ -35,12 +35,11 @@ export interface Preferences {
 
 const endpoint = {
   title: 'ETH Gas price',
-  description: 'The current ETH gas price',
   url: 'https://ethgasstation.info/json/ethgasAPI.json',
 
   icon: '💸',
   subTitle: 'ETH',
-  accessoryTitle: '{{ .average }} Gwei',
+  accessoryTitle: 'Average {{ .average }} Gwei',
   accessoryIcon: '💰',
 
   summary: 'The current ETH gas price is {{ .average }} Gwei',
