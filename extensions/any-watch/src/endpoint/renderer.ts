@@ -1,4 +1,4 @@
-import { getPreferenceValues } from "@raycast/api";
+import { getPreferenceValues, showToast, ToastStyle } from "@raycast/api";
 
 import fetch from "node-fetch";
 import * as jq from "node-jq"
@@ -6,11 +6,7 @@ import * as jq from "node-jq"
 import { Endpoint, Preferences } from "../types";
 
 export async function renderEndpointAttributes (endpoint: Endpoint) {
-  const {
-    url,
-    status,
-    summary,
-  } = endpoint
+  const { url, status, summary, } = endpoint
 
   const preferences: Preferences = await getPreferenceValues()
 
@@ -21,9 +17,16 @@ export async function renderEndpointAttributes (endpoint: Endpoint) {
     console.error(e)
   }
 
-  const renderedStatus = status && await renderJqTemplateString(status, data, preferences.jqPath)
-  const renderedSummary = summary && await renderJqTemplateString(summary, data, preferences.jqPath)
-
+  let renderedStatus = status || ''
+  let renderedSummary = summary || ''
+  
+  try {
+    renderedStatus = await renderJqTemplateString(renderedStatus, data, preferences.jqPath)
+    renderedSummary = await renderJqTemplateString(renderedSummary, data, preferences.jqPath)
+  } catch (e) {
+    showToast(ToastStyle.Failure, `Error rendering endpoint: ${e}`)
+  }
+  
   return {
     status: renderedStatus,
     summary: renderedSummary,
