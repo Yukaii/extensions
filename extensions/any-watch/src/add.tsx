@@ -1,15 +1,23 @@
-import { useNavigation } from "@raycast/api";
+import { showToast, ToastStyle, useNavigation } from "@raycast/api";
 import { EndpointForm } from "./components/EndpointForm";
 import useEndpoints from "./endpoint/useEndpoints";
-import { Endpoint } from "./types";
+import { buildEndpoint, validateEndpointFormValues } from "./endpoint/utils";
+import { RawEndpointInput } from "./types";
 
 export default function Command() {
   const { addEndpoint } = useEndpoints();
   const { pop } = useNavigation();
 
-  const handleSubmit = (values: Endpoint) => {
-    // TODO: Validate form
-    addEndpoint(values);
+  const handleSubmit = (values: RawEndpointInput) => {
+    const error = validateEndpointFormValues(values);
+    if (error) {
+      showToast(ToastStyle.Failure, error);
+      return;
+    }
+
+    const endpoint = buildEndpoint(values);
+
+    addEndpoint(endpoint);
 
     pop();
   };
