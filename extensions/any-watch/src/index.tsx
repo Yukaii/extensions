@@ -4,6 +4,7 @@ import moment from "moment";
 import AddCommand from "./add";
 import usePeriodically from "./utils/usePeriodically";
 import { shouldUpdateEndpoint } from "./endpoint/utils";
+import { Summary } from "./components/Summary";
 
 export default function Command() {
   const { endpoints, isLoading, triggerEndpointRender, removeEndpoint } = useEndpoints();
@@ -35,6 +36,13 @@ export default function Command() {
             key={index}
             actions={
               <ActionPanel>
+                <ActionPanelItem
+                  icon={Icon.LevelMeter}
+                  title="View Summary"
+                  onAction={() =>
+                    push(<Summary title={endpoint.title} summary={endpoint.renderedResults?.summary || ""} />)
+                  }
+                />
                 <ActionPanelItem title="Remove Endpoint" onAction={() => removeEndpoint(endpoint)} icon={Icon.Trash} />
               </ActionPanel>
             }
