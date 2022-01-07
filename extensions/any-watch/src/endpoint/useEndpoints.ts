@@ -31,7 +31,7 @@ export default function useEndpoints () {
   }, [])
 
   const removeEndpoint = useCallback((endpoint: Endpoint) => {
-    setEndpoints(endpoints => endpoints.filter(e => e.url !== endpoint.url))
+    setEndpoints(endpoints => endpoints.filter(e => e.id !== endpoint.id))
   }, [])
 
   const clearAllEndpoints = useCallback(async () => {
@@ -40,7 +40,7 @@ export default function useEndpoints () {
   }, [])
 
   const updateEndpoint = useCallback((endpoint: Endpoint) => {
-    setEndpoints(endpoints => endpoints.map(e => e.url === endpoint.url ? endpoint : e))
+    setEndpoints(endpoints => endpoints.map(e => e.id === endpoint.id ? endpoint : e))
   }, [])
 
   const triggerEndpointRender = useCallback(async (endpoint: Endpoint) => {

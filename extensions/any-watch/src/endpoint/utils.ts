@@ -1,3 +1,4 @@
+import { randomUUID } from "crypto";
 import moment from "moment";
 import { Endpoint, RawEndpointInput } from "../types";
 
@@ -15,6 +16,7 @@ export function shouldUpdateEndpoint (endpoint: Endpoint) {
 
 export function buildEndpoint (values: RawEndpointInput): Endpoint {
   const endpoint: Endpoint = {
+    id: randomUUID(),
     title: values.title || "",
     url: values.url || "",
     icon: values.icon || "",

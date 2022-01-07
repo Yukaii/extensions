@@ -3,6 +3,7 @@ import { Icon } from '@raycast/api'
 export type JqExpression = string
 
 export type Endpoint = {
+  id: string
   title: string;
   url: string;
   
