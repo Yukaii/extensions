@@ -8,8 +8,7 @@ import { Endpoint, Preferences } from "../types";
 export async function renderEndpointAttributes (endpoint: Endpoint) {
   const {
     url,
-    accessoryTitle,
-    subTitle,
+    status,
     summary,
   } = endpoint
 
@@ -22,14 +21,12 @@ export async function renderEndpointAttributes (endpoint: Endpoint) {
     console.error(e)
   }
 
-  const renderedAccessoryTitle = accessoryTitle && await renderJqTemplateString(accessoryTitle, data, preferences.jqPath)
-  const renderedSubTitle = subTitle && await renderJqTemplateString(subTitle, data, preferences.jqPath)
+  const renderedStatus = status && await renderJqTemplateString(status, data, preferences.jqPath)
   const renderedSummary = summary && await renderJqTemplateString(summary, data, preferences.jqPath)
 
   return {
-    renderedAccessoryTitle,
-    renderedSubTitle,
-    renderedSummary,
+    status: renderedStatus,
+    summary: renderedSummary,
   }
 }
 
@@ -41,7 +38,7 @@ export async function renderJqTemplateString (str: string, dataSource: string, j
 
     const value = await jq.run(expression, dataSource, { input: 'string' }, jqPath)
 
-    result = result.replace(whole, value.toString())
+    result = result.replaceAll(whole, value.toString())
   }
 
   return result

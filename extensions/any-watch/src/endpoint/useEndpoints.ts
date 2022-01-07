@@ -44,22 +44,15 @@ export default function useEndpoints () {
   }, [])
 
   const triggerEndpointRender = useCallback(async (endpoint: Endpoint) => {
-    const {
-      renderedAccessoryTitle,
-      renderedSubTitle,
-      renderedSummary
-    } = await renderEndpointAttributes(endpoint)
-
-    const now = Date.now()
+    const { status, summary } = await renderEndpointAttributes(endpoint)
 
     const updatedEndpoint = {
       ...endpoint,
       renderedResults: {
-        subTitle: renderedSubTitle,
-        accessoryTitle: renderedAccessoryTitle,
-        summary: renderedSummary,
+        status,
+        summary
       },
-      lastFetchedAt: now,
+      lastFetchedAt: Date.now().valueOf(),
     }
 
     updateEndpoint(updatedEndpoint)

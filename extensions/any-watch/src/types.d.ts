@@ -9,7 +9,7 @@ export type Endpoint = {
   
   icon?: Icon | string;
   subTitle?: string;
-  accessoryTitle?: string;
+  status?: string;
   accessoryIcon?: Icon | string;
 
   summary?: string;
@@ -19,7 +19,7 @@ export type Endpoint = {
 
   renderedResults?: {
     subTitle?: string;
-    accessoryTitle?: string;
+    status?: string;
     summary?: string;
   };
 }

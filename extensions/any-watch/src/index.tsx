@@ -1,8 +1,11 @@
-import { List } from "@raycast/api";
+import { ActionPanel, ActionPanelItem, Icon, List, useNavigation } from "@raycast/api";
 import useEndpoints from "./endpoint/useEndpoints";
+import moment from "moment";
+import AddCommand from "./add";
 
 export default function Command() {
-  const { endpoints, isLoading, triggerEndpointRender } = useEndpoints();
+  const { endpoints, isLoading, triggerEndpointRender, removeEndpoint } = useEndpoints();
+  const { push } = useNavigation();
 
   return (
     <List isLoading={isLoading} searchBarPlaceholder="Filter by title...">
@@ -12,17 +15,33 @@ export default function Command() {
           triggerEndpointRender(endpoint);
         }
 
+        const subtitle = endpoint.lastFetchedAt ? `updated ${moment(endpoint.lastFetchedAt).fromNow()}` : "";
+
         return (
           <List.Item
             title={endpoint.title}
-            subtitle={endpoint.renderedResults?.subTitle || ""}
-            accessoryTitle={endpoint.renderedResults?.accessoryTitle || ""}
+            subtitle={subtitle}
+            accessoryTitle={endpoint.renderedResults?.status || ""}
             key={index}
+            actions={
+              <ActionPanel>
+                <ActionPanelItem title="Remove Endpoint" onAction={() => removeEndpoint(endpoint)} icon={Icon.Trash} />
+              </ActionPanel>
+            }
           />
         );
       })}
 
-      {!isLoading && endpoints.length === 0 && <List.Item title="Add New Endpoint" />}
+      {!isLoading && endpoints.length === 0 && (
+        <List.Item
+          title="Add New Endpoint"
+          actions={
+            <ActionPanel>
+              <ActionPanelItem title="Open Form" onAction={() => push(<AddCommand />)} />
+            </ActionPanel>
+          }
+        />
+      )}
     </List>
   );
 }
