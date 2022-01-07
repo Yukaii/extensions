@@ -1,14 +1,16 @@
-import { ActionPanel, ActionPanelItem, Icon, List, useNavigation } from "@raycast/api";
+import { ActionPanel, ActionPanelItem, Icon, List, showToast, ToastStyle, useNavigation } from "@raycast/api";
 import useEndpoints from "./endpoint/useEndpoints";
 import moment from "moment";
 import AddCommand from "./add";
 import usePeriodically from "./utils/usePeriodically";
-import { shouldUpdateEndpoint } from "./endpoint/utils";
+import { buildEndpoint, shouldUpdateEndpoint, validateEndpointFormValues } from "./endpoint/utils";
 import { Summary } from "./components/Summary";
+import { EndpointForm } from "./components/EndpointForm";
+import { RawEndpointInput } from "./types";
 
 export default function Command() {
-  const { endpoints, isLoading, triggerEndpointRender, removeEndpoint } = useEndpoints();
-  const { push } = useNavigation();
+  const { endpoints, isLoading, triggerEndpointRender, removeEndpoint, updateEndpoint } = useEndpoints();
+  const { push, pop } = useNavigation();
 
   usePeriodically(() => {
     endpoints.forEach((endpoint) => {
@@ -30,6 +32,7 @@ export default function Command() {
 
         return (
           <List.Item
+            icon={endpoint.icon}
             title={endpoint.title}
             subtitle={subtitle}
             accessoryTitle={endpoint.renderedResults?.status || ""}
@@ -42,6 +45,32 @@ export default function Command() {
                   onAction={() =>
                     push(<Summary title={endpoint.title} summary={endpoint.renderedResults?.summary || ""} />)
                   }
+                />
+                <ActionPanelItem
+                  icon={Icon.Pencil}
+                  title="Edit Endpoint"
+                  onAction={() => {
+                    const handleUpdate = (values: RawEndpointInput) => {
+                      const error = validateEndpointFormValues(values);
+                      if (error) {
+                        showToast(ToastStyle.Failure, error);
+                        return;
+                      }
+
+                      const _endpoint = {
+                        ...buildEndpoint(values),
+                        id: endpoint.id,
+                      };
+
+                      updateEndpoint(_endpoint);
+
+                      pop();
+                    };
+
+                    push(
+                      <EndpointForm endpoint={endpoint} submitTitle="Update Endpoint" handleSubmit={handleUpdate} />
+                    );
+                  }}
                 />
                 <ActionPanelItem title="Remove Endpoint" onAction={() => removeEndpoint(endpoint)} icon={Icon.Trash} />
               </ActionPanel>

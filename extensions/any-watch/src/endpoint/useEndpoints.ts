@@ -20,6 +20,7 @@ export default function useEndpoints () {
 
   useEffect(() => {
     const saveEndpoints = async () => {
+      console.log(JSON.stringify(endpoints))
       await setLocalStorageItem('endpoints', JSON.stringify(endpoints))
     }
 
@@ -40,7 +41,14 @@ export default function useEndpoints () {
   }, [])
 
   const updateEndpoint = useCallback((endpoint: Endpoint) => {
-    setEndpoints(endpoints => endpoints.map(e => e.id === endpoint.id ? endpoint : e))
+    setEndpoints(endpoints => {
+      console.log('new endpoint')
+      console.log(endpoint)
+      const newEndpoints = endpoints.map(e => e.id === endpoint.id ? endpoint : e)
+      console.log(newEndpoints)
+
+      return newEndpoints
+    })
   }, [])
 
   const triggerEndpointRender = useCallback(async (endpoint: Endpoint) => {
