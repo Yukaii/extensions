@@ -64,6 +64,7 @@ export default function useEndpoints () {
     endpoints,
     addEndpoint,
     removeEndpoint,
+    refreshEndpoints: loadEndpoints,
     clearAllEndpoints,
     updateEndpoint,
     triggerEndpointRender,

@@ -9,7 +9,8 @@ import { EndpointForm } from "./components/EndpointForm";
 import { RawEndpointInput } from "./types";
 
 export default function Command() {
-  const { endpoints, isLoading, triggerEndpointRender, removeEndpoint, updateEndpoint } = useEndpoints();
+  const { endpoints, isLoading, triggerEndpointRender, removeEndpoint, updateEndpoint, refreshEndpoints } =
+    useEndpoints();
   const { push, pop } = useNavigation();
 
   usePeriodically(() => {
@@ -65,6 +66,8 @@ export default function Command() {
                       updateEndpoint(_endpoint);
 
                       pop();
+
+                      refreshEndpoints();
                     };
 
                     push(
