@@ -1,17 +1,4 @@
-import {
-  ActionPanel,
-  ActionPanelItem,
-  AlertActionStyle,
-  Color,
-  confirmAlert,
-  Form,
-  Icon,
-  List,
-  ListSection,
-  OpenInBrowserAction,
-  SubmitFormAction,
-  useNavigation,
-} from "@raycast/api";
+import { ActionPanel, Color, confirmAlert, Form, Icon, List, useNavigation, Action, Alert } from "@raycast/api";
 import { ChainId, ComplexProtocol, Token } from "@yukaii/debank-types";
 import { useEffect, useMemo, useState } from "react";
 import { getComplexProtocolList, getTokenList, getTotalBalance, TotalBalance } from "./api";
@@ -39,16 +26,16 @@ export default function Command() {
       actions={
         address ? (
           <ActionPanel>
-            <ActionPanelItem
+            <Action
               title={`Show Balance`}
               icon={Icon.Binoculars}
               onAction={() => {
                 push(<BalanceView address={address} />);
               }}
             />
-            <OpenInBrowserAction url={`https://debank.com/profile/${address}`} title="Open on DeBank" />
+            <Action.OpenInBrowser url={`https://debank.com/profile/${address}`} title="Open on DeBank" />
             {!favoriteAddresses.find((add) => address && add.address === address) && (
-              <ActionPanelItem
+              <Action
                 title={`Add to Favorites`}
                 icon={Icon.Star}
                 shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
@@ -77,27 +64,29 @@ export default function Command() {
         defaultItem
       ) : (
         <>
-          <ListSection title="Favorites">
+          <List.Section title="Favorites">
             {favoriteAddresses.map((address) => (
               <List.Item
                 key={address.address}
                 title={address.identifier || address.address}
-                accessoryTitle={!address.identifier ? "" : address.address}
                 icon={{
                   source: Icon.Star,
                   tintColor: Color.Yellow,
                 }}
                 actions={
                   <ActionPanel>
-                    <ActionPanelItem
+                    <Action
                       title={`Show Balance`}
                       icon={Icon.Binoculars}
                       onAction={() => {
                         push(<BalanceView address={address.address} />);
                       }}
                     />
-                    <OpenInBrowserAction url={`https://debank.com/profile/${address.address}`} title="Open on DeBank" />
-                    <ActionPanelItem
+                    <Action.OpenInBrowser
+                      url={`https://debank.com/profile/${address.address}`}
+                      title="Open on DeBank"
+                    />
+                    <Action
                       title={`Remove from Favorites`}
                       icon={Icon.Star}
                       shortcut={{ modifiers: ["cmd", "shift"], key: "f" }}
@@ -109,7 +98,7 @@ export default function Command() {
                           }" from your favorites?`,
                           primaryAction: {
                             title: "Remove",
-                            style: AlertActionStyle.Destructive,
+                            style: Alert.ActionStyle.Destructive,
                             onAction: () => removeFavoriteAddress(address.address),
                           },
                         });
@@ -117,11 +106,16 @@ export default function Command() {
                     />
                   </ActionPanel>
                 }
+                accessories={[
+                  {
+                    text: !address.identifier ? "" : address.address,
+                  },
+                ]}
               />
             ))}
-          </ListSection>
+          </List.Section>
 
-          <ListSection title="Search for Address">{defaultItem}</ListSection>
+          <List.Section title="Search for Address">{defaultItem}</List.Section>
         </>
       )}
     </List>
@@ -138,7 +132,7 @@ function AddFavoriteAddressForm(props: AddFavoriteAddressFormProps) {
     <Form
       actions={
         <ActionPanel>
-          <SubmitFormAction title="Add to Favorites" onSubmit={props.onSubmit} />
+          <Action.SubmitForm title="Add to Favorites" onSubmit={props.onSubmit} />
         </ActionPanel>
       }
     >
@@ -172,15 +166,19 @@ export function BalanceView(props: BalanceViewProps) {
     <List navigationTitle={`Account Balance of ${props.address}`} isLoading={isLoading}>
       {balance && (
         <>
-          <ListSection title="Total">
+          <List.Section title="Total">
             <List.Item
               key="1"
               title="Total Balance"
-              accessoryTitle={`$${balance.total_usd_value.toLocaleString("en-US", { maximumFractionDigits: 2 })}`}
+              accessories={[
+                {
+                  text: `$${balance.total_usd_value.toLocaleString("en-US", { maximumFractionDigits: 2 })}`,
+                },
+              ]}
             />
-          </ListSection>
+          </List.Section>
 
-          <ListSection title="Chain">
+          <List.Section title="Chain">
             {balance.chain_list
               .filter((chain) => chain.usd_value > 0)
               .map((chain) => {
@@ -188,13 +186,12 @@ export function BalanceView(props: BalanceViewProps) {
                   <List.Item
                     key={chain.id}
                     title={chain.name}
-                    accessoryTitle={`$${chain.usd_value.toLocaleString("en-US", { maximumFractionDigits: 2 })}`}
                     icon={{
                       source: chain.logo_url,
                     }}
                     actions={
                       <ActionPanel>
-                        <ActionPanelItem
+                        <Action
                           title={`Show Protocols on ${chain.name}`}
                           onAction={() => {
                             push(<AssetsView address={props.address} chainId={chain.id} chainName={chain.name} />);
@@ -202,10 +199,15 @@ export function BalanceView(props: BalanceViewProps) {
                         />
                       </ActionPanel>
                     }
+                    accessories={[
+                      {
+                        text: `$${chain.usd_value.toLocaleString("en-US", { maximumFractionDigits: 2 })}`,
+                      },
+                    ]}
                   />
                 );
               })}
-          </ListSection>
+          </List.Section>
         </>
       )}
     </List>
@@ -269,10 +271,14 @@ export function AssetsView(props: AssetsViewProps) {
               subtitle={`$${token.price?.toString() || 0} * ${token.amount.toLocaleString("en-US", {
                 maximumFractionDigits: 2,
               })}`}
-              accessoryTitle={`$${((token.price || 0) * token.amount).toLocaleString("en-US", {
-                maximumFractionDigits: 2,
-              })}`}
               icon={token.logo_url ? { source: token.logo_url } : undefined}
+              accessories={[
+                {
+                  text: `$${((token.price || 0) * token.amount).toLocaleString("en-US", {
+                    maximumFractionDigits: 2,
+                  })}`,
+                },
+              ]}
             />
           ))}
       </List.Section>
@@ -306,9 +312,13 @@ export function AssetsView(props: AssetsViewProps) {
                         key={`${protocol.id}-${item.name}-${index}`}
                         title={item.name}
                         subtitle={`${balance}${rewarded && ` | (${rewarded})`}`}
-                        accessoryTitle={`$${item.stats.net_usd_value.toLocaleString("en-US", {
-                          maximumFractionDigits: 2,
-                        })}`}
+                        accessories={[
+                          {
+                            text: `$${item.stats.net_usd_value.toLocaleString("en-US", {
+                              maximumFractionDigits: 2,
+                            })}`,
+                          },
+                        ]}
                       />
                     );
                   })}
