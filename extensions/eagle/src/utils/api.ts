@@ -14,11 +14,11 @@ export function getItems(params: {
   orderBy?: OrderBy;
   keyword?: string;
   ext?: string;
-  tags?: string;
+  tags?: string[];
   folders?: string;
 }) {
   return instance.get<EagleAPIResponse<Item[]>>("/item/list", {
-    params,
+    params: { ...params, tags: params.tags?.join(", ") },
   });
 }
 

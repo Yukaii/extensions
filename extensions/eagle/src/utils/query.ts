@@ -25,9 +25,9 @@ export function useApplicationInfo() {
   });
 }
 
-export function useItemList(search: string) {
-  const { data, error } = useSWR(`/api/item/list?keyword=${search}`, () => {
-    return getItems({ keyword: search });
+export function useItemList({ keyword, tags }: { keyword?: string; tags?: string[] }) {
+  const { data, error } = useSWR(`/api/item/list?keyword=${keyword}`, () => {
+    return getItems({ keyword, tags });
   });
 
   const items = useMemo(() => {

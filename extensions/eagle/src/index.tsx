@@ -7,9 +7,9 @@ import { checkEagleInstallation } from "./utils/checkInstall";
 import { showEagleNotOpenToast } from "./utils/error";
 
 export default function Index() {
-  const [search, setSearch] = useState("");
+  const [keyword, setKeyword] = useState("");
 
-  const { isLoading, data: items, error } = useItemList(search);
+  const { isLoading, data: items, error } = useItemList({ keyword });
 
   checkEagleInstallation();
 
@@ -20,7 +20,7 @@ export default function Index() {
   }
 
   return (
-    <List isShowingDetail onSearchTextChange={setSearch} isLoading={isLoading}>
+    <List isShowingDetail onSearchTextChange={setKeyword} isLoading={isLoading}>
       {items.map((item) => (
         <EagleItem key={item.id} item={item} />
       ))}

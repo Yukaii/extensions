@@ -1,7 +1,8 @@
-import { Detail } from "@raycast/api";
+import { Action, ActionPanel, Detail } from "@raycast/api";
 import { useMemo } from "react";
 import { useThumbnail } from "../utils/query";
 import { Item } from "../@types/eagle";
+import { ItemListByTag } from "./ItemListByTag";
 
 export function ItemDetail({ item }: { item: Item }) {
   const { data: thumbnail } = useThumbnail(item.id);
@@ -20,18 +21,39 @@ export function ItemDetail({ item }: { item: Item }) {
     return "";
   }, [item]);
 
+  const markdown = useMemo(() => {
+    if (item.name && thumbnail) {
+      return `# ${item.name}
+
+![](${thumbnail})`;
+    } else if (item.name) {
+      return `# ${item.name}`;
+    } else {
+      return "";
+    }
+  }, [item, thumbnail]);
+
   return (
     <Detail
       navigationTitle={item.name}
-      markdown={`# ${item.name}
-  
-  ![](${thumbnail})`}
+      markdown={markdown}
       isLoading={!thumbnail}
+      actions={
+        <ActionPanel>
+          {item?.tags.length > 0 && (
+            <ActionPanel.Submenu title="Search by Tags...">
+              {item.tags.map((tag, index) => (
+                <Action.Push key={index} title={tag} target={<ItemListByTag tag={tag} />} />
+              ))}
+            </ActionPanel.Submenu>
+          )}
+        </ActionPanel>
+      }
       metadata={
         <Detail.Metadata>
-          {item.palettes.length > 0 ? (
+          {(item.palettes?.length || -1) > 0 ? (
             <Detail.Metadata.TagList title="Palettes">
-              {item.palettes.slice(0, 6).map((palette, index) => {
+              {item.palettes!.slice(0, 6).map((palette, index) => {
                 const color = `#${palette.color.map((c) => c.toString(16)).join("")}`;
                 const ratio = palette.ratio > 1 ? palette.ratio.toFixed(0) : palette.ratio.toFixed(1);
 

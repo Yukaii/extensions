@@ -11,7 +11,7 @@ export default function EagleItem({ item }: { item: Item }) {
       icon={Icon.Document}
       actions={
         <ActionPanel>
-          <Action.Push target={<ItemDetail item={item} />} title="View Detail" />
+          <Action.Push icon={Icon.Sidebar} target={<ItemDetail item={item} />} title="View Detail" />
         </ActionPanel>
       }
     />
