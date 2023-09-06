@@ -31,4 +31,23 @@ export type ActionsToPayloadMap = {
       response: Record<string, number[]>;
     };
   };
+
+  getDeckStats: {
+    6: {
+      request: {
+        decks: string[];
+      };
+      response: Record<
+        string,
+        {
+          deck_id: number;
+          name: string;
+          new_count: number;
+          learn_count: number;
+          review_count: number;
+          total_in_deck: number;
+        }
+      >;
+    };
+  };
 };

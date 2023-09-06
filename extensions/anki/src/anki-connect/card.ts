@@ -1,6 +1,14 @@
 export type CardId = number;
 
 export type ActionsToPayloadMap = {
+  findCards: {
+    6: {
+      request: {
+        query: string;
+      };
+      response: CardId[];
+    };
+  };
   getEaseFactors: {
     6: {
       request: {

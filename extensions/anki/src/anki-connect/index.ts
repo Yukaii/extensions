@@ -1,21 +1,23 @@
-import fetch from 'cross-fetch'
+import fetch from "cross-fetch";
 
-import type { ActionsToPayloadMap as NoteActionsToPayloadMap } from './note';
-import type { ActionsToPayloadMap as DeckActionsToPayloadMap } from './deck';
-import type { ActionsToPayloadMap as ModelActionsToPayloadMap } from './model';
-import type { ActionsToPayloadMap as MediaActionsToPayloadMap } from './media';
-import type { ActionsToPayloadMap as MiscellaneousActionsToPayloadMap } from './miscellaneous';
+import type { ActionsToPayloadMap as NoteActionsToPayloadMap } from "./note";
+import type { ActionsToPayloadMap as DeckActionsToPayloadMap } from "./deck";
+import type { ActionsToPayloadMap as ModelActionsToPayloadMap } from "./model";
+import type { ActionsToPayloadMap as MediaActionsToPayloadMap } from "./media";
+import type { ActionsToPayloadMap as MiscellaneousActionsToPayloadMap } from "./miscellaneous";
+import type { ActionsToPayloadMap as CardActionsToPayloadMap } from "./card";
 
-export * as CardTypes from './card';
-export * as NoteTypes from './note';
-export * as ModelTypes from './model';
-export * as MediaTypes from './media';
+export * as CardTypes from "./card";
+export * as NoteTypes from "./note";
+export * as ModelTypes from "./model";
+export * as MediaTypes from "./media";
 
 type ActionsToPayloadMap = NoteActionsToPayloadMap &
   DeckActionsToPayloadMap &
   ModelActionsToPayloadMap &
   MediaActionsToPayloadMap &
-  MiscellaneousActionsToPayloadMap;
+  MiscellaneousActionsToPayloadMap &
+  CardActionsToPayloadMap;
 
 export type ActionNames = keyof ActionsToPayloadMap;
 
@@ -27,9 +29,9 @@ export type ActionNames = keyof ActionsToPayloadMap;
 export type ApiOrigin = string | number;
 function getApiOrigin(input?: ApiOrigin): string {
   if (input) {
-    return typeof input === 'number' ? `http://127.0.0.1:${input}` : input;
+    return typeof input === "number" ? `http://127.0.0.1:${input}` : input;
   }
-  return 'http://127.0.0.1:8765';
+  return "http://127.0.0.1:8765";
 }
 
 /**
@@ -37,18 +39,12 @@ function getApiOrigin(input?: ApiOrigin): string {
  *
  * Must match the value set in the `"apiKey"` property of the Anki-Connect configuration.
  */
-export type ApiKey =
-  | string
-  | number
-  | boolean
-  | null
-  | { [key: string]: ApiKey }
-  | ApiKey[];
+export type ApiKey = string | number | boolean | null | { [key: string]: ApiKey } | ApiKey[];
 
 export interface InvokeArgs<
   ActionName extends ActionNames,
   VersionNumber extends 6,
-  RequestParams = ActionsToPayloadMap[ActionName][VersionNumber]['request']
+  RequestParams = ActionsToPayloadMap[ActionName][VersionNumber]["request"]
 > {
   action: ActionName;
   version: VersionNumber;
@@ -60,17 +56,14 @@ export interface InvokeArgs<
 export type InvokeResponse<
   ActionName extends ActionNames,
   VersionNumber extends 6
-> = ActionsToPayloadMap[ActionName][VersionNumber]['response'];
+> = ActionsToPayloadMap[ActionName][VersionNumber]["response"];
 
 /**
  * Call anki-connect API
  *
  * See https://github.com/microsoft/TypeScript/issues/29131
  */
-export async function invoke<
-  ActionName extends ActionNames,
-  VersionNumber extends 6
->(
+export async function invoke<ActionName extends ActionNames, VersionNumber extends 6>(
   args: InvokeArgs<ActionName, VersionNumber>
 ): Promise<InvokeResponse<ActionName, VersionNumber>> {
   const action = args.action;
@@ -88,17 +81,17 @@ export async function invoke<
         key,
       }),
     }),
-    method: 'POST',
+    method: "POST",
   }).then((response) => response.json());
 
   if (Object.getOwnPropertyNames(data).length !== 2) {
-    throw new Error('response has an unexpected number of fields');
+    throw new Error("response has an unexpected number of fields");
   }
-  if (!('error' in data)) {
-    throw new Error('response is missing required error field');
+  if (!("error" in data)) {
+    throw new Error("response is missing required error field");
   }
-  if (!('result' in data)) {
-    throw new Error('response is missing required result field');
+  if (!("result" in data)) {
+    throw new Error("response is missing required result field");
   }
   if (data.error) {
     throw new Error(`Anki-connect request failed: "${data.error}"`);

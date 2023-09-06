@@ -1,20 +1,19 @@
 import { ActionPanel, Detail, List, Action } from "@raycast/api";
-// import { ActionNames, invoke } from "@autoanki/anki-connect";
-import { usePromise } from "@raycast/utils";
-import { useHealthCheck, useDeckNamesAndIds } from "./api";
-import { invoke, ActionNames } from './anki-connect'
+import { useHealthCheck, useDeckNamesAndIds, useFindCards, useGetDeckStats } from "./api";
 
-const Cards = ({ deckName, deckId }: { deckName: string, deckId: number }) => {
-  console.log(deckName, deckId);
-  invoke({
-    action: "getNumCardsReviewedToday" as ActionNames,
-    request: {
-      // query: `deckId:${deckId}`,
-    } as any,
-    version: 6,
-  }).then(console.log);
+const Cards = ({ deckName, query }: { deckName: string; query?: string }) => {
+  const { data: cardIds = [] } = useFindCards(deckName, query);
 
-  return <Detail markdown={`## ${deckName}`} />;
+  return (
+    <Detail
+      markdown={`## ${deckName}
+${cardIds.length} cards found
+
+${cardIds.map((cardId) => `- ${cardId}`).join("\n")}
+
+`}
+    />
+  );
 };
 
 const ShowIf = ({ condition, children }: { condition: boolean | any; children: JSX.Element }) => {
@@ -23,34 +22,47 @@ const ShowIf = ({ condition, children }: { condition: boolean | any; children: J
 
 const DeckList = () => {
   const { data: deckNamesAndIds = {}, isLoading } = useDeckNamesAndIds();
+  const { data: deckStats = {}, isLoading: isDeckStatsLoading } = useGetDeckStats(Object.keys(deckNamesAndIds));
 
   return (
-    <List isLoading={isLoading}>
-      {Object.entries(deckNamesAndIds).map(([deckName, deckId]) => (
-        <List.Item
-          key={deckName}
-          title={deckName}
-          actions={
-            <ActionPanel>
-              <Action.Push target={<Cards deckName={deckName} deckId={deckId} />} title="Show Cards" />
-            </ActionPanel>
-          }
-        />
-      ))}
+    <List isLoading={isLoading || isDeckStatsLoading} navigationTitle="Decks">
+      {Object.entries(deckNamesAndIds).map(([deckName, deckId]) => {
+        const deckStat = deckStats[deckId];
+
+        return (
+          <List.Item
+            key={deckName}
+            title={deckName}
+            accessories={[
+              {
+                icon: '📥',
+                text: String(deckStat?.new_count || 0),
+                tooltip: 'New',
+              },
+              {
+                icon: '📚',
+                text: String(deckStat?.learn_count || 0),
+                tooltip: 'Learn',
+              },
+              {
+                icon: '🔁',
+                text: String(deckStat?.review_count || 0),
+                tooltip: 'Review',
+              },
+            ]}
+            actions={
+              <ActionPanel>
+                <Action.Push target={<Cards deckName={deckName} />} title="Show Cards" />
+              </ActionPanel>
+            }
+          />
+        );
+      })}
     </List>
   );
 };
 
 export default function Command() {
-  // const { data: deckNamesAndIds = {}, isLoading } = usePromise(() =>
-  //   invoke({
-  //     action: "deckNamesAndIds",
-  //     request: {} as unknown as void,
-  //     // request: null,
-  //     version: 6,
-  //   })
-  // );
-
   const { data: healthCheck } = useHealthCheck();
 
   return (
