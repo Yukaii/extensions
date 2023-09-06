@@ -1,18 +1,18 @@
 import { ActionPanel, Detail, List, Action } from "@raycast/api";
-import { useHealthCheck, useDeckNamesAndIds, useFindCards, useGetDeckStats } from "./api";
+import { useHealthCheck, useDeckNamesAndIds, useFindCards, useGetDeckStats, useCardsInfo } from "./api";
 
-const Cards = ({ deckName, query }: { deckName: string; query?: string }) => {
+const TodayCards = ({ deckName, query }: { deckName: string; query?: string }) => {
   const { data: cardIds = [] } = useFindCards(deckName, query);
 
+  const { data: cardsInfo = [] } = useCardsInfo(cardIds);
+
   return (
-    <Detail
-      markdown={`## ${deckName}
-${cardIds.length} cards found
-
-${cardIds.map((cardId) => `- ${cardId}`).join("\n")}
-
-`}
-    />
+    <List isLoading={!cardsInfo}>
+      {cardsInfo.map((cardInfo) => {
+        console.log(cardInfo.answer);
+        return <List.Item key={cardInfo.note} title={cardInfo.question} />;
+      })}
+    </List>
   );
 };
 
@@ -35,24 +35,24 @@ const DeckList = () => {
             title={deckName}
             accessories={[
               {
-                icon: '📥',
+                icon: "📥",
                 text: String(deckStat?.new_count || 0),
-                tooltip: 'New',
+                tooltip: "New",
               },
               {
-                icon: '📚',
+                icon: "📚",
                 text: String(deckStat?.learn_count || 0),
-                tooltip: 'Learn',
+                tooltip: "Learning",
               },
               {
-                icon: '🔁',
+                icon: "🔁",
                 text: String(deckStat?.review_count || 0),
-                tooltip: 'Review',
+                tooltip: "To Review",
               },
             ]}
             actions={
               <ActionPanel>
-                <Action.Push target={<Cards deckName={deckName} />} title="Show Cards" />
+                <Action.Push target={<TodayCards deckName={deckName} query="is:due" />} title="Show Due Cards" />
               </ActionPanel>
             }
           />

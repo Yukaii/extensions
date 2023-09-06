@@ -22,17 +22,21 @@ export const useDeckNamesAndIds = () => {
 };
 
 export const useGetDeckStats = (decks: string[]) => {
-  return usePromise(async () => {
-    return invoke({
-      version: 6,
-      action: "getDeckStats",
-      request: {
-        decks,
-      }
-    });
-  }, [], {
+  return usePromise(
+    async () => {
+      return invoke({
+        version: 6,
+        action: "getDeckStats",
+        request: {
+          decks,
+        },
+      });
+    },
+    [],
+    {
       execute: decks.length > 0,
-    });
+    }
+  );
 };
 
 export const useFindCards = (deckName: string, query = "") => {
@@ -44,5 +48,22 @@ export const useFindCards = (deckName: string, query = "") => {
       },
       version: 6,
     })
+  );
+};
+
+export const useCardsInfo = (cardIds: number[]) => {
+  return usePromise(
+    () =>
+      invoke({
+        action: "cardsInfo",
+        request: {
+          cards: cardIds,
+        },
+        version: 6,
+      }),
+    [],
+    {
+      execute: cardIds.length > 0,
+    }
   );
 };
