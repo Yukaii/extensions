@@ -3,6 +3,7 @@ import { type ReactElement, useMemo } from "react";
 import { List } from "@raycast/api";
 import NoteListItem from "./NoteListItem";
 import { usePinnedNotes } from "../hooks/usePinnedNotes";
+import { createNoteFromPinned } from "../helpers/pinnedNote";
 
 const sortByLastChanged = (a: Note, b: Note) =>
   new Date(b.lastChangedAt).valueOf() - new Date(a.lastChangedAt).valueOf();
@@ -36,34 +37,32 @@ export default function NotesList({
   sortByCategory?: boolean;
   unpinnedSectionTitle?: string;
 }) {
-  const { isPinned, pinnedNotesMap } = usePinnedNotes();
+  const { pinnedNotesMap } = usePinnedNotes();
 
   const { pinnedNotes, unpinnedNotes } = useMemo(() => {
-    if (!notes) return { pinnedNotes: [], unpinnedNotes: [] };
+    const notesList = notes ?? [];
 
-    const pinnedAtMap = new Map<string, number>();
+    const pinByNoteId = new Map<string, (typeof pinnedNotesMap)[string][number]>();
     for (const workspacePins of Object.values(pinnedNotesMap)) {
-      for (const p of workspacePins) {
-        pinnedAtMap.set(p.noteId, p.pinnedAt);
+      for (const pin of workspacePins) {
+        const existing = pinByNoteId.get(pin.noteId);
+        if (!existing || pin.pinnedAt > existing.pinnedAt) {
+          pinByNoteId.set(pin.noteId, pin);
+        }
       }
     }
 
-    const pinned: Note[] = [];
-    const unpinned: Note[] = [];
+    const notesById = new Map(notesList.map((note) => [note.id, note]));
+    const pinnedIds = new Set(pinByNoteId.keys());
 
-    for (const note of notes) {
-      if (isPinned(note)) {
-        pinned.push(note);
-      } else {
-        unpinned.push(note);
-      }
-    }
+    const pinned = [...pinByNoteId.values()]
+      .sort((a, b) => b.pinnedAt - a.pinnedAt)
+      .map((pin) => notesById.get(pin.noteId) ?? createNoteFromPinned(pin));
 
-    pinned.sort((a, b) => (pinnedAtMap.get(b.id) || 0) - (pinnedAtMap.get(a.id) || 0));
-    unpinned.sort(sortByLastChanged);
+    const unpinned = notesList.filter((note) => !pinnedIds.has(note.id)).sort(sortByLastChanged);
 
     return { pinnedNotes: pinned, unpinnedNotes: unpinned };
-  }, [notes, isPinned, pinnedNotesMap]);
+  }, [notes, pinnedNotesMap]);
 
   const groupedNotesByCategory = useMemo(() => {
     const groupedNotes = unpinnedNotes.reduce(

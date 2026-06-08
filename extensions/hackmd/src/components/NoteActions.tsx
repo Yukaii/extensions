@@ -14,7 +14,8 @@ import {
 import api from "../lib/api";
 import NoteForm from "./NoteForm";
 import { useCachedPromise } from "@raycast/utils";
-import { getNoteUrl } from "../helpers/noteHelper";
+import { getDisplayNoteUrl } from "../helpers/pinnedNote";
+import { getWorkspaceUrl } from "../helpers/noteHelper";
 import CreateNote from "../create-note";
 import { usePinnedNotes } from "../hooks/usePinnedNotes";
 
@@ -27,8 +28,8 @@ export default function NoteActions({
   mutate?: () => void;
   onDeleteCallback?: () => void;
 }) {
-  const noteUrl = getNoteUrl(note);
-  const editUrl = getNoteUrl(note, true);
+  const noteUrl = getDisplayNoteUrl(note);
+  const editUrl = getDisplayNoteUrl(note, true);
 
   const { data: singleNoteData } = useCachedPromise((noteId) => api.getNote(noteId), [note.id]);
   const { pop } = useNavigation();
@@ -38,6 +39,7 @@ export default function NoteActions({
   return (
     <>
       <Action.OpenInBrowser title="Open in Browser" url={noteUrl} />
+      <Action.OpenInBrowser title="Open Workspace" url={getWorkspaceUrl(note)} icon={Icon.House} />
       <Action.CopyToClipboard title="Copy Note Link" content={noteUrl} shortcut={Keyboard.Shortcut.Common.Copy} />
       <Action
         title={pinned ? "Unpin Note" : "Pin Note"}

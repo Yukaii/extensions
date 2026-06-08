@@ -1,10 +1,16 @@
 import { useLocalStorage } from "@raycast/utils";
 import type { Note } from "@hackmd/api/dist/type";
 import { useCallback } from "react";
+import { buildPinnedNote } from "../helpers/pinnedNote";
 
 export type PinnedNote = {
   noteId: string;
   pinnedAt: number;
+  title?: string;
+  noteUrl?: string;
+  teamPath?: string;
+  tags?: string[];
+  lastChangedAt?: string;
 };
 
 export type PinnedNotesMap = Record<string, PinnedNote[]>;
@@ -37,7 +43,7 @@ export function usePinnedNotes() {
       if (alreadyPinned) {
         newPinned = currentPinned.filter((p) => p.noteId !== note.id);
       } else {
-        newPinned = [...currentPinned, { noteId: note.id, pinnedAt: Date.now() }];
+        newPinned = [...currentPinned, buildPinnedNote(note)];
       }
 
       await setValue({

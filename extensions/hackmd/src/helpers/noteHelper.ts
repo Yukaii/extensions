@@ -26,3 +26,10 @@ export const getNoteUrl = (note: Note, editMode = false): string => {
   }
   return new url.URL(note.shortId, instance_url).toString();
 };
+
+export const getWorkspaceUrl = (note: Note): string => {
+  if (note.teamPath) {
+    return new url.URL(`/team/${note.teamPath}?nav=overview`, instance_url).toString();
+  }
+  return new url.URL("/?nav=overview", instance_url).toString();
+};
